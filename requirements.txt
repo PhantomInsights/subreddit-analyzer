@@ -1,0 +1,8 @@
+matplotlib
+numpy
+pandas
+requests
+seaborn
+spacy
+tldextract
+word_cloud
