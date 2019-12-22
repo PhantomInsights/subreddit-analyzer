@@ -172,7 +172,7 @@ def plot_comments_and_posts_by_weekday(df, df2):
     # with the previous ones.
     bars2 = plt.bar([i + 0.2 for i in comments_weekdays.keys()], [(i / total2) * 100 for i in comments_weekdays.values()], 0.4,
                     color="#f9a825", linewidth=0)
-    
+
     # This loop creates small texts with the absolute values above each bar (second set of bars).
     for bar2 in bars2:
         height2 = bar2.get_height()
@@ -456,10 +456,10 @@ def plot_comments_by_user(df):
     plt.savefig("commentsbyuser.png", facecolor="#222222")
 
 
-def generate_most_common_words_word_cloud():
+def generate_most_common_words_word_cloud(df):
     """Generates a word cloud with the most used tokens.
 
-    arameters
+    Parameters
     ----------
     df : pandas.DataFrame
         The tokens DataFrame.
@@ -515,7 +515,7 @@ def generate_most_common_words_word_cloud():
 def generate_most_common_entities_word_cloud(df):
     """Generates a word cloud with the most used entities.
 
-    arameters
+    Parameters
     ----------
     df : pandas.DataFrame
         The entities DataFrame.
