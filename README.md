@@ -258,7 +258,7 @@ EN_STOPWORDS = "./assets/stopwords-en.txt"
 ES_STOPWORDS = "./assets/stopwords-es.txt"
 ```
 
-With our style defined it is time to load up our datasets.
+With our imports ready and our style defined it is time to load up our datasets.
 
 ```python
 df = pd.read_csv("mexico-submissions.csv",
@@ -270,9 +270,9 @@ df2 = pd.read_csv("mexico-comments.csv",
                   index_col=0)
 ```
 
-*Note: I included the datasets i used for my infographics in the data folder. The comments body were removed from the comments dataset for privacy reasons.*
-
 It is very important to specify which column to treat as a date object and set it as our index. We are mostly working with time series data and this will make things much easier down the road.
+
+*Note: I included the datasets i used for my infographics in the data folder. The comments body were removed from the comments dataset for privacy reasons.*
 
 ## Exploratory Data Analysis
 
@@ -357,11 +357,11 @@ print(df["domain"].value_counts()[0:20])
 | aristeguinoticias.com | 117 |
 | zocalo.com.mx | 116 |
 
-Most of these domains are from news websites. It is important to distinguish between `self-post` and `reddit.com`. The `reddit.com` domain includes images, videos and urls to comments or submissions by other users.
+Most of these domains are from news websites. It is important to distinguish between `self-post` and `reddit.com`. The `reddit.com` domain includes images, videos and urls to comments or submissions by other users, but it does not include text-only posts known as `self-posts`.
 
 ### Most Frequent Submitters and Commenters
 
-Getting the users that made the most submissions and comments is only done with one line of code.
+Getting the users that made the most submissions and comments requires only one line of code.
 
 ```python
 # Submissions
@@ -459,11 +459,11 @@ print(resampled_comments.idxmax()["author"])
 2019-12-14 00:00:00
 ```
 
+With the `describe()` method we can know the mean, max and min values of submissions and comments. The count refers to the number of days we have resampled which is 349.
+
 ```python
 print(resampled_submissions.describe())
 ```
-
-With the `describe()` method we can know the mean, max and min values of submissions and comments. The count refers to the number of days we have resampled which is 349.
 
 | | author |
 | -- | -- |
@@ -495,7 +495,7 @@ print(resampled_comments.describe())
 
 On the following sections we will continue resampling our dates and creating some nice looking plots.
 
-REmember, the most important part was to set a `dateimeindex`.
+Remember, the most important part was to set a `datetimeindex`.
 
 ### Weekday Distribution
 
@@ -720,7 +720,7 @@ ax1.spines["top"].set_visible(False)
 ax1.legend(["Submissions"])
 ```
 
-We plot the second DataFrame.
+We plot the second `DataFrame`.
 
 ```python
 ax2.plot(df2.index, df2.author, color="#f9a825")
@@ -832,6 +832,6 @@ The other difference is the colormap. The first word cloud uses `summer` and the
 
 For my last project of 2019 I wanted to create something that combined everything I learned in the year and this is the result.
 
-It was great learning and sharing about NLP, Text Mining, Data Mining and Data Analysis.
+It was great learning and sharing about NLP, Text Mining, Data Mining and Data Analysis. I hope you will find this project interesting and don't forget to ask your questions in the `Issues` tab.
 
 [![Become a Patron!](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/bePatron?u=20521425)
