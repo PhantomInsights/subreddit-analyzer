@@ -46,7 +46,7 @@ def get_most_common_domains(df):
     print(df)
 
 
-def get_most_common_posters(df):
+def get_most_common_submitters(df):
     """Prints the 20 most frequent submitters.
 
     Parameters
@@ -55,6 +55,9 @@ def get_most_common_posters(df):
         The submissions DataFrame.
 
     """
+
+    # Optional: Remove the [deleted] user.
+    df.drop(df[df["author"] == "[deleted]"].index, inplace=True)
 
     df = df["author"].value_counts()[0:20]
     print(df)
@@ -104,15 +107,15 @@ def get_insights(df, df2):
     print("Common Submitters and Commenters:", len(
         submitters_set.intersection(commenters_set)))
 
-    print("Not common posters:", len(submitters_set.difference(commenters_set)))
+    print("Not common submitters:", len(submitters_set.difference(commenters_set)))
     print("Not common commenters:", len(
         commenters_set.difference(submitters_set)))
 
-    print("\nPosts stats:\n")
-    resampled_posts = df.resample("D").count()
-    print("Most posts on:", resampled_posts.idxmax()["author"])
-    print("Least posts on:", resampled_posts.idxmin()["author"])
-    print(resampled_posts.describe())
+    print("\Submissions stats:\n")
+    resampled_submissions = df.resample("D").count()
+    print("Most submissions on:", resampled_submissions.idxmax()["author"])
+    print("Least submissions on:", resampled_submissions.idxmin()["author"])
+    print(resampled_submissions.describe())
 
     print("\nComments stats:\n")
     resampled_comments = df2.resample("D").count()
@@ -121,9 +124,9 @@ def get_insights(df, df2):
     print(resampled_comments.describe())
 
 
-def plot_comments_and_posts_by_weekday(df, df2):
+def plot_submissions_and_comments_by_weekday(df, df2):
     """Creates a vertical bar plot with the percentage of
-    submissions and posts by weekday.
+    submissions and comments by weekday.
 
     Parameters
     ----------
@@ -144,20 +147,20 @@ def plot_comments_and_posts_by_weekday(df, df2):
     total2 = len(df2)
 
     # 0 to 6 (Monday to Sunday).
-    posts_weekdays = {i: 0 for i in range(0, 7)}
+    submissions_weekdays = {i: 0 for i in range(0, 7)}
     comments_weekdays = {i: 0 for i in range(0, 7)}
 
     # We filter the DataFrames and set each weekday value
     # equal to its number of records.
-    for k, v in posts_weekdays.items():
-        posts_weekdays[k] = len(df[df.index.weekday == k])
+    for k, v in submissions_weekdays.items():
+        submissions_weekdays[k] = len(df[df.index.weekday == k])
 
     for k, v in comments_weekdays.items():
         comments_weekdays[k] = len(df2[df2.index.weekday == k])
 
     # The first set of vertical bars have a little offset to the left.
     # This is so the next set of bars can fit in the same place.
-    bars = plt.bar([i - 0.2 for i in posts_weekdays.keys()], [(i / total) * 100 for i in posts_weekdays.values()], 0.4,
+    bars = plt.bar([i - 0.2 for i in submissions_weekdays.keys()], [(i / total) * 100 for i in submissions_weekdays.values()], 0.4,
                    color="#1565c0", linewidth=0)
 
     # This loop creates small texts with the absolute values above each bar.
@@ -186,7 +189,7 @@ def plot_comments_and_posts_by_weekday(df, df2):
     plt.gca().spines["right"].set_visible(False)
 
     # For the xticks we use the previously defined English weekdays.
-    plt.xticks(list(posts_weekdays.keys()), labels)
+    plt.xticks(list(submissions_weekdays.keys()), labels)
 
     # We add final customizations.
     plt.xlabel("Day of the Week")
@@ -194,12 +197,12 @@ def plot_comments_and_posts_by_weekday(df, df2):
     plt.title("Submissions and Comments by Day")
     plt.legend(["Submissions", "Comments"])
     plt.tight_layout()
-    plt.savefig("postsandcommentsbyweekday.png", facecolor="#222222")
+    plt.savefig("submissionsandcommentsbyweekday.png", facecolor="#222222")
 
 
-def plot_comments_and_posts_by_hour(df, df2):
+def plot_submissions_and_comments_by_hour(df, df2):
     """Creates a horizontal bar plot with the percentage of
-    submissions and posts by hour of the day.
+    submissions and comments by hour of the day.
 
     Parameters
     ----------
@@ -225,21 +228,21 @@ def plot_comments_and_posts_by_hour(df, df2):
     total2 = len(df2)
 
     # We create dictionaries with keys from 0 to 23 (11 pm) hours.
-    posts_hours = {i: 0 for i in range(0, 24)}
+    submissions_hours = {i: 0 for i in range(0, 24)}
     comments_hours = {i: 0 for i in range(0, 24)}
 
     # We filter the DataFrames and set each hour value
     # equal to its number of records.
-    for k, v in posts_hours.items():
-        posts_hours[k] = len(df[df.index.hour == k])
+    for k, v in submissions_hours.items():
+        submissions_hours[k] = len(df[df.index.hour == k])
 
     for k, v in comments_hours.items():
         comments_hours[k] = len(df2[df2.index.hour == k])
 
     # The first set of horizontal bars have a little offset to the top.
     # This is so the next set of bars can fit in the same place.
-    bars = plt.barh(y=[i + 0.2 for i in posts_hours.keys()],
-                    width=[(i / total) * 100 for i in posts_hours.values()],
+    bars = plt.barh(y=[i + 0.2 for i in submissions_hours.keys()],
+                    width=[(i / total) * 100 for i in submissions_hours.values()],
                     height=0.4, color="#1565c0",  linewidth=0)
 
     # This loop creates small texts with the absolute values next to each bar.
@@ -269,7 +272,7 @@ def plot_comments_and_posts_by_hour(df, df2):
     plt.gca().spines["right"].set_visible(False)
 
     # For the yticks we use the previously defined hours labels.
-    plt.yticks(list(posts_hours.keys()), labels)
+    plt.yticks(list(submissions_hours.keys()), labels)
 
     # We add final customizations.
     plt.xlabel("Percentage")
@@ -277,12 +280,12 @@ def plot_comments_and_posts_by_hour(df, df2):
     plt.title("Submissions and comments by Hour")
     plt.legend(["Submissions", "Comments"])
     plt.tight_layout()
-    plt.savefig("postsandcommentsbyhour.png", facecolor="#222222")
+    plt.savefig("submissionsandcommentsbyhour.png", facecolor="#222222")
 
 
-def plot_yearly_comments_and_posts(df, df2):
+def plot_yearly_submissions_and_comments(df, df2):
     """Creates 2 line subplots with the counts of
-    submissions and posts by day.
+    submissions and comments by day.
 
     Parameters
     ----------
@@ -315,10 +318,10 @@ def plot_yearly_comments_and_posts(df, df2):
 
     # We add the final customization.
     fig.tight_layout()
-    plt.savefig("dailypostsandcomments.png", facecolor="#222222")
+    plt.savefig("dailysubmissionsandcomments.png", facecolor="#222222")
 
 
-def plot_posts_by_user(df):
+def plot_submissions_by_user(df):
     """Plots a pie chart with the distribution
     of submissions by user groups.
 
@@ -381,7 +384,7 @@ def plot_posts_by_user(df):
     # We add the final customization.
     plt.axis("equal")
     plt.legend(final_labels)
-    plt.savefig("postsbyuser.png", facecolor="#222222")
+    plt.savefig("submissionsbyuser.png", facecolor="#222222")
 
 
 def plot_comments_by_user(df):
@@ -498,6 +501,7 @@ def generate_most_common_words_word_cloud(df):
     # We create the mask from our cloud image.
     mask = np.array(Image.open(MASK_FILE))
 
+    # We prepare our word cloud object and save it to disk.
     wc = wordcloud.WordCloud(background_color="#222222",
                              max_words=1000,
                              mask=mask,
@@ -507,7 +511,6 @@ def generate_most_common_words_word_cloud(df):
                              contour_color="white",
                              collocations=False)
 
-    # We prepare our word cloud object and save it to disk.
     wc.generate(" ".join(words_list))
     wc.to_file("mostusedwords.png")
 
@@ -573,7 +576,7 @@ def generate_most_common_entities_word_cloud(df):
 
 if __name__ == "__main__":
 
-    posts_df = pd.read_csv("mexico-posts.csv",
+    submissions_df = pd.read_csv("mexico-submissions.csv",
                            parse_dates=["datetime"], index_col=0)
 
     comments_df = pd.read_csv("mexico-comments.csv",
