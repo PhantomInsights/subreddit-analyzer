@@ -23,12 +23,12 @@ The following are the summaries of the included scripts:
 This project uses the following Python libraries
 
 * requests - For querying the Pushshift API.
-* spaCy : For passing the comments into a NLP pipeline.
-* NumPy : For fast matrix operations.
-* pandas : For analysing and getting insights from datasets.
-* matplotlib : For creating graphs and plots.
-* seaborn : For enhancing the style of matplotlib plots.
-* word_cloud = For creating the word clouds.
+* spaCy - For passing the comments into a NLP pipeline.
+* NumPy - For fast matrix operations.
+* pandas - For analysing and getting insights from datasets.
+* matplotlib - For creating graphs and plots.
+* seaborn - For enhancing the style of matplotlib plots.
+* word_cloud - For creating the word clouds.
 
 ## ETL Process
 
