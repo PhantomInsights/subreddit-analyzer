@@ -8,11 +8,11 @@ The following are the summaries of the included scripts:
 
 * subreddit_comments.py - A Python script that downloads a fixed amount of comments from the `Pushshift` API.
 
-* subreddit_posts.py - A Python script that downloads a fixed amount of submissions from the `Pushshift` API.
+* subreddit_submissions.py - A Python script that downloads a fixed amount of submissions from the `Pushshift` API.
 
 * subreddit_comments_alt.py - A Python script that downloads comments starting from the newest one to the first one of the specified date from the `Pushshift` API.
 
-* subreddit_posts_alt.py - A Python script that downloads submissions starting from the newest one to the first one of the specified date from the `Pushshift` API.
+* subreddit_submissions_alt.py - A Python script that downloads submissions starting from the newest one to the first one of the specified date from the `Pushshift` API.
 
 * step2.py - A Python script that uses `spaCy` to pass the downloaded comments into a NLP pipeline.
 
@@ -40,11 +40,11 @@ The scripts allows you to specify any number of subreddits you desire.
 SUBREDDITS = ["mexico", "python", "learnpython"]
 ```
 
-After that you have the chance of specifying the number of submissions/comments or a target date.
+After that, you have the chance of specifying the number of submissions/comments or a target date.
 
 ```python
 # Fixed amount version.
-MAX_POSTS = 10000
+MAX_SUBMISSIONS = 10000
 
 # Target date version.
 # Year month and day.
@@ -67,17 +67,17 @@ Now that we have our subreddits and targets defined we iterate over all the subr
 ```python
 for subreddit in SUBREDDITS:
 
-    writer = csv.writer(open("./{}-posts.csv".format(subreddit),
+    writer = csv.writer(open("./{}-submissions.csv".format(subreddit),
                                 "w", newline="", encoding="utf-8"))
 
     # Adding the header.
     writer.writerow(["datetime", "author", "title", "url", "domain"])
 
     print("Downloading:", subreddit)
-    load_posts(subreddit=subreddit)
-    writer.writerows(POSTS_LIST)
+    download_submissions(subreddit=subreddit)
+    writer.writerows(SUBMISSIONS_LIST)
 
-    POSTS_LIST.clear()
+    SUBMISSIONS_LIST.clear()
 ```
 
 For these scripts I like to recycle a global list to add all the submissions or comments data.
@@ -99,10 +99,10 @@ if latest_timestamp != None:
 with requests.get(base_url, params=params, headers=HEADERS) as response:
 
     json_data = response.json()
-    total_posts = len(json_data["data"])
+    total_submissions = len(json_data["data"])
     latest_timestamp = 0
 
-    print("Downloading: {} posts".format(total_posts))
+    print("Downloading: {} submissions".format(total_submissions))
 
     for item in json_data["data"]:
 
@@ -123,24 +123,24 @@ with requests.get(base_url, params=params, headers=HEADERS) as response:
         if domain == "redd.it":
             domain = "reddit.com"
 
-        POSTS_LIST.append(
+        SUBMISSIONS_LIST.append(
             [iso_date, item["author"], item["title"], item["url"], domain])
 
-        if len(POSTS_LIST) >= MAX_POSTs:
+        if len(SUBMISSIONS_LIST) >= MAX_SUBMISSIONS:
             break
 
-    if total_posts < 500:
+    if total_submissions < 500:
         print("No more results.")
-    elif len(POSTS_LIST) >= MAX_POSTs:
+    elif len(submissions_LIST) >= MAX_SUBMISSIONS:
         print("Download complete.")
     else:
         time.sleep(1.2)
-        load_posts(subreddit, latest_timestamp)
+        download_submissions(subreddit, latest_timestamp)
 ```
 
 The function is simple enough, it sends parameters to the `Pushshift` API, iterates over the response and extracts the fields we need.
 
-The domain extraction is only used in the `posts` version.
+The domain extraction is only used in the `submissions` version.
 
 The `comments` version has a few differences, the most important is the API endpoint, instead of:
 
@@ -261,7 +261,7 @@ ES_STOPWORDS = "./assets/stopwords-es.txt"
 With our style defined it is time to load up our datasets.
 
 ```python
-df = pd.read_csv("mexico-posts.csv",
+df = pd.read_csv("mexico-submissions.csv",
                  parse_dates=["datetime"],
                  index_col=0)
 
@@ -425,36 +425,77 @@ When I presented these results to the community of r/Mexico they were really amu
 
 ## Time Series Analysis
 
-Now we will do some time series data analysis manipulation.
+Now we will do some time series data analysis and manipulation.
+
+First we will resample our submissions and comments by day.
+
+```python
+resampled_submissions = df.resample("D").count()
+resampled_comments = df2.resample("D").count()
+```
+
+With our `Dataframes` resampled we can easily know which were the days with most and least activity.
 
 
-Posts stats:
+```python
+# Submissions stats
 
-Most posts on: 2019-10-18 00:00:00
-Least posts on: 2019-08-31 00:00:00
-           author       title         url      domain
-count  349.000000  349.000000  349.000000  349.000000
-mean    95.994269   95.994269   95.994269   95.994269
-std     22.875097   22.875097   22.875097   22.875097
-min     45.000000   45.000000   45.000000   45.000000
-25%     82.000000   82.000000   82.000000   82.000000
-50%     96.000000   96.000000   96.000000   96.000000
-75%    109.000000  109.000000  109.000000  109.000000
-max    182.000000  182.000000  182.000000  182.000000
+# Most submissions on:
+print(resampled_submissions.idxmax()["author"])
+2019-10-18 00:00:00
 
-Comments stats:
+# Least submissions on:
+print(resampled_submissions.idxmin()["author"])
+2019-08-31 00:00:00
 
-Most comments on: 2019-01-23 00:00:00
-Least comments on: 2019-12-14 00:00:00
-            author         body
-count   349.000000   349.000000
-mean   1695.684814  1695.681948
-std     499.562094   499.561750
-min     714.000000   714.000000
-25%    1353.000000  1353.000000
-50%    1666.000000  1666.000000
-75%    1952.000000  1952.000000
-max    3772.000000  3772.000000
+# Comments stats
+
+#Most comments on:
+print(resampled_comments.idxmax()["author"])
+2019-01-23 00:00:00
+
+# Least comments on:
+print(resampled_comments.idxmax()["author"])
+2019-12-14 00:00:00
+```
+
+```python
+print(resampled_submissions.describe())
+```
+
+With the `describe()` method we can know the mean, max and min values of submissions and comments. The count refers to the number of days we have resampled which is 349.
+
+| | author |
+| -- | -- |
+| count | 349.000000 |
+| mean | 95.994269 |
+| std | 22.875097 |
+| min | 45.000000 |
+| 25% | 82.000000 |
+| 50% | 96.000000 |
+| 75% | 109.000000 |
+| max | 182.000000 |
+
+```python
+print(resampled_comments.describe())
+```
+
+| | author | 
+| -- | -- |
+| count | 349.000000 |
+| mean | 1695.684814 |
+| std | 499.562094 |
+| min | 714.000000 |
+| 25% | 1353.000000 |
+| 50% | 1666.000000 |
+| 75% | 1952.000000 |
+| max | 3772.000000 |
+
+`pandas` offers several ways to resample your dates, you can also resample by week, month, specific number of days (2,3,4 days), hours, minutes, etc.
+
+On the following sections we will continue resampling our dates and creating some nice looking plots.
+
+REmember, the most important part was to set a `dateimeindex`.
 
 ### Weekday Distribution
 
@@ -477,15 +518,15 @@ total2 = len(df2)
 0 to 6 (Monday to Sunday).
 
 ```python
-posts_weekdays = {i: 0 for i in range(0, 7)}
+submissions_weekdays = {i: 0 for i in range(0, 7)}
 comments_weekdays = {i: 0 for i in range(0, 7)}
 ```
 
-We filter the DataFrames and set each weekday value equal to its number of records.
+We filter the `DataFrames` and set each weekday value equal to its number of records.
 
 ```python
-for k, v in posts_weekdays.items():
-    posts_weekdays[k] = len(df[df.index.weekday == k])
+for k, v in submissions_weekdays.items():
+    submissions_weekdays[k] = len(df[df.index.weekday == k])
 
 for k, v in comments_weekdays.items():
     comments_weekdays[k] = len(df2[df2.index.weekday == k])
@@ -494,7 +535,7 @@ for k, v in comments_weekdays.items():
 The first set of vertical bars have a little offset to the left. This is so the next set of bars can fit in the same place.
 
 ```python
-bars = plt.bar([i - 0.2 for i in posts_weekdays.keys()], [(i / total) * 100 for i in posts_weekdays.values()], 0.4,
+bars = plt.bar([i - 0.2 for i in submissions_weekdays.keys()], [(i / total) * 100 for i in submissions_weekdays.values()], 0.4,
                 color="#1565c0", linewidth=0)
 
 # This loop creates small texts with the absolute values above each bar.
@@ -531,7 +572,7 @@ plt.gca().spines["right"].set_visible(False)
 For the xticks we use the previously defined English weekdays.
 
 ```python
-plt.xticks(list(posts_weekdays.keys()), labels)
+plt.xticks(list(submissions_weekdays.keys()), labels)
 ```
 
 We add final customizations.
@@ -542,10 +583,10 @@ plt.ylabel("Percentage")
 plt.title("Submissions and Comments by Day")
 plt.legend(["Submissions", "Comments"])
 plt.tight_layout()
-plt.savefig("postsandcommentsbyweekday.png", facecolor="#222222")
+plt.savefig("submissionsandcommentsbyweekday.png", facecolor="#222222")
 ```
 
-![Posts and Comments by Weekday](./figs/postsandcommentsbyweekday.png)
+![Submissions and Comments by Weekday](./figs/submissionsandcommentsbyweekday.png)
 
 ### Hourly Distribution
 
@@ -576,15 +617,15 @@ total2 = len(df2)
 We create dictionaries with keys from 0 to 23 (11 pm) hours.
 
 ```python
-posts_hours = {i: 0 for i in range(0, 24)}
+submissions_hours = {i: 0 for i in range(0, 24)}
 comments_hours = {i: 0 for i in range(0, 24)}
 ```
 
-We filter the DataFrames and set each hour value equal to its number of records.
+We filter the `DataFrames` and set each hour value equal to its number of records.
 
 ```python
-for k, v in posts_hours.items():
-    posts_hours[k] = len(df[df.index.hour == k])
+for k, v in submissions_hours.items():
+    submissions_hours[k] = len(df[df.index.hour == k])
 
 for k, v in comments_hours.items():
     comments_hours[k] = len(df2[df2.index.hour == k])
@@ -593,8 +634,8 @@ for k, v in comments_hours.items():
 The first set of horizontal bars have a little offset to the top. This is so the next set of bars can fit in the same place.
 
 ```python
-bars = plt.barh(y=[i + 0.2 for i in posts_hours.keys()],
-                width=[(i / total) * 100 for i in posts_hours.values()],
+bars = plt.barh(y=[i + 0.2 for i in submissions_hours.keys()],
+                width=[(i / total) * 100 for i in submissions_hours.values()],
                 height=0.4, color="#1565c0",  linewidth=0)
 
 # This loop creates small texts with the absolute values next to each bar.
@@ -632,7 +673,7 @@ plt.gca().spines["right"].set_visible(False)
 For the yticks we use the previously defined hours labels.
 
 ```python
-plt.yticks(list(posts_hours.keys()), labels)
+plt.yticks(list(submissions_hours.keys()), labels)
 ```
 
 We add final customizations.
@@ -643,16 +684,16 @@ plt.ylabel("Hour of the Day")
 plt.title("Submissions and comments by Hour")
 plt.legend(["Submissions", "Comments"])
 plt.tight_layout()
-plt.savefig("postsandcommentsbyhour.png", facecolor="#222222")
+plt.savefig("submissionsandcommentsbyhour.png", facecolor="#222222")
 ```
 
-![Posts and Comments by Hour](./figs/postsandcommentsbyhour.png)
+![submissions and Comments by Hour](./figs/submissionsandcommentsbyhour.png)
 
 ### Daily Distribution
 
 This line plot shows us the daily counts of submissions and comments. It was divided into 2 subplots for easier interpretation.
 
-we first resample both DataFrames for daily counts.
+we first resample both `DataFrames` for daily counts.
 
 ```python
 df = df.resample("D").count()
@@ -671,7 +712,7 @@ We set tht title now.
 fig.suptitle("Daily Submissions and Comments")
 ```
 
-We plot the first DataFrame and remove the top spine.
+We plot the first `DataFrame` and remove the top spine.
 
 ```python
 ax1.plot(df.index, df.author, color="#1565c0")
@@ -690,10 +731,10 @@ We add the final customization.
 
 ```python
 fig.tight_layout()
-plt.savefig("dailypostsandcomments.png", facecolor="#222222")
+plt.savefig("dailysubmissionsandcomments.png", facecolor="#222222")
 ```
 
-![Daily Posts and Comments](./figs/dailypostsandcomments.png)
+![Daily submissions and Comments](./figs/dailysubmissionsandcomments.png)
 
 ## Word Clouds
 
@@ -704,9 +745,9 @@ For creating word clouds we will use the `word_cloud` library, which makes it ve
 df = pd.read_csv("tokens.csv")
 ```
 
-Once you have loaded the dataset you need we will require to load some stopwords. I loaded English and Spanish ones, feel free to load ones from your preferred language.
+Once you have loaded the dataset you will require to load some stopwords. I loaded English and Spanish ones, feel free to load ones from your preferred language.
 
-*Note: You can find stopwords for most languages by doing a web search for: `(my language) stopwords github`*
+*Note: You can find stopwords for most languages by doing a web search for: `(the language) stopwords github`*
 
 ```python
 # We load English and Spanish stop words that will be
@@ -789,10 +830,8 @@ The other difference is the colormap. The first word cloud uses `summer` and the
 
 ## Conclusion
 
-In previous projects, I have used some `NLP`  workflows, such as tokenizing words and sentences, but this time I wanted to do something a bit more complex.
+For my last project of 2019 I wanted to create something that combined everything I learned in the year and this is the result.
 
-I learned several new things and their best practices. This new knowledge will come in handy for future projects.
-
-The next steps are to build a `Machine Learning` model for sentiment analysis and evaluate next year's report with it.
+It was great learning and sharing about NLP, Text Mining, Data Mining and Data Analysis.
 
 [![Become a Patron!](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/bePatron?u=20521425)
