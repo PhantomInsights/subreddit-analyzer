@@ -5,4 +5,4 @@ requests
 seaborn
 spacy
 tldextract
-word_cloud
+wordcloud
