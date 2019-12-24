@@ -28,7 +28,7 @@ This project uses the following Python libraries
 * pandas - For analysing and getting insights from datasets.
 * matplotlib - For creating graphs and plots.
 * seaborn - For enhancing the style of matplotlib plots.
-* word_cloud - For creating the word clouds.
+* wordcloud - For creating the word clouds.
 
 ## ETL Process
 
@@ -738,7 +738,7 @@ plt.savefig("dailysubmissionsandcomments.png", facecolor="#222222")
 
 ## Word Clouds
 
-For creating word clouds we will use the `word_cloud` library, which makes it very easy. The first thing to do is to load the tokens or entities datasets.
+For creating word clouds we will use the `wordcloud` library, which makes it very easy. The first thing to do is to load the tokens or entities datasets.
 
 ```python
 # No special flags required.
