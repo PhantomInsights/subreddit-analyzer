@@ -166,11 +166,11 @@ I had to run this command on my CMD/Terminal:
 
 `python -m spacy download es_core_news_sm`
 
-If you are using another language you must go the following page and look for your appropiate command:
+If you are using another language you must go the following page and look for your appropriate command:
 
 https://spacy.io/usage/models
 
-Once you have downloaded your appropiate model we need to take a sample of comments from the dataset.
+Once you have downloaded your appropriate model we need to take a sample of comments from the dataset.
 
 ```python
 comments_list = list()
