@@ -314,7 +314,7 @@ I removed the titles and the real urls for privacy reasons but you should get th
 
 The comments `DataFrame` looks almost the same, it only has 3 fields: datetime, author and comment body. We will skip showing its table.
 
-Let's check how many rows each `dataFrame` has so the next insights are more meaningful.
+Let's check how many rows each `DataFrame` has so the next insights are more meaningful.
 
 ```python
 # Submissions DataFrame
@@ -328,7 +328,7 @@ print(len(df2))
 
 ### Most Frequent Domains
 
-Getting the top 20 most common domains in submissoins is done with one line of code.
+Getting the top 20 most common domains in submissions is done with one line of code.
 
 ```python
 print(df["domain"].value_counts()[0:20])
