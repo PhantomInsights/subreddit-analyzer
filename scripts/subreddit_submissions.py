@@ -8,7 +8,6 @@ import time
 from datetime import datetime
 
 import requests
-
 import tldextract
 
 SUBREDDITS = ["mexico"]
