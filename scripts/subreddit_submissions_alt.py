@@ -9,7 +9,6 @@ import sys
 from datetime import datetime
 
 import requests
-
 import tldextract
 
 # 10,000 should cover at least 2 years of submissions.
