@@ -44,7 +44,7 @@ def get_tokens(nlp, corpus):
     nlp : spacy.nlp
         A nlp object.
 
-    corpus: list
+    corpus : list
         All the comments in a list.
 
     """
@@ -74,7 +74,7 @@ def get_entities(nlp, corpus):
     nlp : spacy.nlp
         A nlp object.
 
-    corpus: list
+    corpus : list
         All the comments in a list.
 
     """
